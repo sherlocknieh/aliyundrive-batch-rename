@@ -2,11 +2,7 @@
 	<!-- 弹窗容器: 文字颜色设为 slate-700 (灰蓝色) -->
 	<div class="text-slate-700">
 		<!-- 选择/排序弹窗 -->
-		<el-dialog
-			v-model="dialogVisible1"
-			width="80%"
-			destroy-on-close
-		>
+		<el-dialog v-model="dialogVisible1" width="80%" destroy-on-close>
 			<!-- 文件列表 -->
 			<el-card shadow="never" class="rounded-2xl border border-slate-200/70 bg-white/80 backdrop-blur">
 				<template #header>
@@ -14,40 +10,30 @@
 						<span>选择</span>
 						<div class="flex items-center">
 							<span class="mr-2.5 text-slate-500">过滤非视频文件</span>
-							<el-switch
-								v-model="needFilter"
-								@change="handleFilter"
-							>
+							<el-switch v-model="needFilter" @change="handleFilter">
 							</el-switch>
 						</div>
 					</div>
 				</template>
-				<div class="flex gap-4 leading-9.75 p-0 box-border h-130 w-full overflow-y-auto tw-scroll rounded-xl border border-slate-200/60 bg-slate-50/70">
+				<div
+					class="flex gap-4 leading-9.75 p-0 box-border h-130 w-full overflow-y-auto tw-scroll rounded-xl border border-slate-200/60 bg-slate-50/70">
 					<div class="flex flex-col text-right py-2.5 pl-2 border-r border-slate-200/70 pr-4 bg-white/50">
-                        <span
-							v-for="(_, index) in data.sortList"
-							:key="index"
-							class="w-10 h-9.75 leading-9.75 flex items-center justify-end text-xs font-medium text-slate-500 border-b border-transparent"
-						>{{ index + 1 }}</span>
+						<span v-for="(_, index) in data.sortList" :key="index"
+							class="w-10 h-9.75 leading-9.75 flex items-center justify-end text-xs font-medium text-slate-500 border-b border-transparent">{{
+								index + 1 }}</span>
 					</div>
 					<div class="flex-1 pl-1">
-						<draggable
-							v-model="data.sortList"
-							:item-key="'file_id'"
-							:animation="0"
-							class="min-h-5 w-full py-2.5 pr-2"
-							ghostClass="tw-ghost"
-							group="description"
-							tag="ul"
-							@end="onSortEnd"
-						>
+						<draggable v-model="data.sortList" :item-key="'file_id'" :animation="0"
+							class="min-h-5 w-full py-2.5 pr-2" ghostClass="tw-ghost" group="description" tag="ul"
+							@end="onSortEnd">
 							<template #item="{ element }">
-								<li class="m-0 box-border relative tracking-[1px] whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-between text-sm select-none cursor-grab rounded-lg px-3 h-9.75 hover:bg-white/80">
-									<p class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap border-b border-dashed border-slate-300 text-slate-700">{{ element.name }}</p>
-									<span
-										@click="handleRemove(element)"
-										class="flex items-center justify-center w-9.75 h-9.75 text-[26px] font-light text-slate-400 cursor-pointer hover:text-rose-500"
-									>×</span>
+								<li
+									class="m-0 box-border relative tracking-[1px] whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-between text-sm select-none cursor-grab rounded-lg px-3 h-9.75 hover:bg-white/80">
+									<p
+										class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap border-b border-dashed border-slate-300 text-slate-700">
+										{{ element.name }}</p>
+									<span @click="handleRemove(element)"
+										class="flex items-center justify-center w-9.75 h-9.75 text-[26px] font-light text-slate-400 cursor-pointer hover:text-rose-500">×</span>
 								</li>
 							</template>
 						</draggable>
@@ -57,61 +43,40 @@
 
 			<template #footer>
 				<span class="flex justify-end gap-2">
-                    <el-button
-						:loading="loading"
-						@click="dialogVisible1 = false"
-					>
-                        取消
-                    </el-button>
-                    <el-button
-						:loading="loading"
-						type="primary"
-						@click="dialogVisible2 = true"
-					>
-                        确定
-                    </el-button>
-                </span>
+					<el-button :loading="loading" @click="dialogVisible1 = false">
+						取消
+					</el-button>
+					<el-button :loading="loading" type="primary" @click="dialogVisible2 = true">
+						确定
+					</el-button>
+				</span>
 			</template>
 		</el-dialog>
-		
+
 		<!-- 重命名弹窗 -->
-		<el-dialog
-			v-model="dialogVisible2"
-			class="dialog-fixed-body"
-			destroyOnClose
-			title="确定重命名"
-			width="80%"
-		>
+		<el-dialog v-model="dialogVisible2" class="dialog-fixed-body" destroyOnClose title="确定重命名" width="80%">
 			<!-- 重命名栏 -->
 			<div class="flex flex-col gap-3 min-h-0">
 				<!-- 重命名 -->
-				<el-tabs
-					v-model="activeTab"
-					type="border-card"
-					@tab-change="handleTabChange"
-					class="rounded-xl border border-slate-200/70"
-				>
+				<el-tabs v-model="activeTab" type="border-card" @tab-change="handleTabChange"
+					class="rounded-xl border border-slate-200/70">
 					<el-tab-pane :name="1" label="按序号重命名">
 						<el-space :size="-1" :fill="true" class="w-full">
-							<el-input v-model="prefix" placeholder="前缀"/>
-							<el-input
-								v-model="indexNumber"
-								:formatter="formatIndexNumber"
-								placeholder="序号"
-							/>
-							<el-input v-model="suffix" placeholder="后缀"/>
+							<el-input v-model="prefix" placeholder="前缀" />
+							<el-input v-model="indexNumber" :formatter="formatIndexNumber" placeholder="序号" />
+							<el-input v-model="suffix" placeholder="后缀" />
 						</el-space>
 					</el-tab-pane>
 					<el-tab-pane :name="2" label="追加重命名">
 						<el-space :size="-1" :fill="true" class="w-full">
-							<el-input v-model="prefix" placeholder="追加前缀"/>
-							<el-input v-model="suffix" placeholder="追加后缀"/>
+							<el-input v-model="prefix" placeholder="追加前缀" />
+							<el-input v-model="suffix" placeholder="追加后缀" />
 						</el-space>
 					</el-tab-pane>
 					<el-tab-pane :name="3" label="查找替换">
 						<el-space :size="-1" :fill="true" class="w-full">
-							<el-input v-model="prefix" placeholder="查找内容"/>
-							<el-input v-model="suffix" placeholder="替换内容"/>
+							<el-input v-model="prefix" placeholder="查找内容" />
+							<el-input v-model="suffix" placeholder="替换内容" />
 						</el-space>
 					</el-tab-pane>
 					<el-tab-pane :name="4" label="正则替换">
@@ -123,10 +88,7 @@
 								<template #append>
 									<el-popover trigger="hover">
 										<template #reference>
-											<el-link
-												underline="never"
-												type="primary"
-											>
+											<el-link underline="never" type="primary">
 												/{{ modifiers.join('') }}
 											</el-link>
 										</template>
@@ -147,37 +109,38 @@
 									</el-popover>
 								</template>
 							</el-input>
-							<el-input v-model="suffix" placeholder="替换内容"/>
+							<el-input v-model="suffix" placeholder="替换内容" />
 						</el-space>
 					</el-tab-pane>
 					<el-tab-pane :name="5" label="文件格式替换">
 						<el-space :size="-1" :fill="true" class="w-full">
-							<el-input v-model="fileExtension" placeholder="替换成"/>
+							<el-input v-model="fileExtension" placeholder="替换成" />
 						</el-space>
 					</el-tab-pane>
 				</el-tabs>
 				<!-- 结果预览 -->
-				<el-card header="预览" shadow="never" class="rounded-2xl border border-slate-200/70 bg-white/80 backdrop-blur flex-1 min-h-0">
-					<div class="flex gap-4 leading-9.75 p-0 box-border h-full w-full overflow-y-auto tw-scroll rounded-xl border border-slate-200/60 bg-slate-50/70">
+				<el-card header="预览" shadow="never"
+					class="rounded-2xl border border-slate-200/70 bg-white/80 backdrop-blur flex-1 min-h-0">
+					<div
+						class="flex gap-4 leading-9.75 p-0 box-border h-full w-full overflow-y-auto tw-scroll rounded-xl border border-slate-200/60 bg-slate-50/70">
 						<!-- 索引 -->
 						<div class="flex flex-col text-right py-2.5 pl-2 border-r border-slate-200/70 pr-4 bg-white/50">
-                        <span
-							v-for="(_, index) in data.sortList"
-							:key="index"
-							class="w-10 h-9.75 leading-9.75 flex items-center justify-end text-xs font-medium text-slate-500 border-b border-transparent"
-						>
-                            {{ index + 1 }}
-                        </span>
+							<span v-for="(_, index) in data.sortList" :key="index"
+								class="w-10 h-9.75 leading-9.75 flex items-center justify-end text-xs font-medium text-slate-500 border-b border-transparent">
+								{{ index + 1 }}
+							</span>
 						</div>
-						
+
 						<div class="flex-1 pl-1">
 							<ul class="min-h-5 w-full py-2.5 pr-2">
-								<li
-									class="m-0 box-border relative tracking-[1px] whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-between text-sm select-none rounded-lg px-3 h-9.75 hover:bg-white/80"
-									v-for="(item, index) in data.sortList"
-								>
-									<p class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap border-b border-dashed border-slate-300 text-slate-700">{{ item.name }}</p>
-									<p class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap border-b border-solid border-slate-200 ml-12.5 text-slate-500">{{ formatName(item, index) }}</p>
+								<li class="m-0 box-border relative tracking-[1px] whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-between text-sm select-none rounded-lg px-3 h-9.75 hover:bg-white/80"
+									v-for="(item, index) in data.sortList">
+									<p
+										class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap border-b border-dashed border-slate-300 text-slate-700">
+										{{ item.name }}</p>
+									<p
+										class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap border-b border-solid border-slate-200 ml-12.5 text-slate-500">
+										{{ formatName(item, index) }}</p>
 								</li>
 							</ul>
 						</div>
@@ -186,38 +149,30 @@
 			</div>
 			<template #footer>
 				<span class="flex justify-end gap-2">
-                    <el-button
-						:loading="loading"
-						@click="dialogVisible2 = false"
-					>
-                        取消
-                    </el-button>
-                    <el-button
-						:loading="loading"
-						type="primary"
-						@click="confirmRename"
-					>
-                        确定
-                    </el-button>
-                </span>
+					<el-button :loading="loading" @click="dialogVisible2 = false">
+						取消
+					</el-button>
+					<el-button :loading="loading" type="primary" @click="confirmRename">
+						确定
+					</el-button>
+				</span>
 			</template>
 		</el-dialog>
 
 		<!-- 启动按钮 -->
-		<div
-			id="batchBtn"
-			class="fixed bottom-30 right-12 text-sm text-white cursor-pointer select-none rounded-full px-5 py-2.5 font-semibold z-9999999 bg-linear-to-r from-[#637dff] to-[#6c5cff] shadow-[0_10px_28px_rgba(99,125,255,0.35)] ring-1 ring-white/30 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(99,125,255,0.45)] active:translate-y-0 active:shadow-[0_8px_20px_rgba(99,125,255,0.35)]"
-			@click="handleBatchBtnClick">
+		<el-button @click="handleBatchBtnClick"
+			class="fixed z-1000 bottom-30 right-8 rounded-full px-8 h-10 text-white bg-linear-to-r from-[#637dff] to-[#6c5cff] transition-all duration-300 ease-out hover:-translate-y-0.5  active:translate-y-0 active:shadow-[0_8px_20px_rgba(99,125,255,0.35)]" type="primary">
 			批量重命名
-		</div>
+		</el-button>
 	</div>
 </template>
 
 
 <script setup>
-import {computed, reactive, ref} from 'vue';
+
+import { computed, reactive, ref } from 'vue';
 import draggable from 'vuedraggable';
-import {ElMessage, ElMessageBox} from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 let obj = {};
 let nextMarker = '';
@@ -390,7 +345,7 @@ XMLHttpRequest.prototype.open = function () {
 			if (this.readyState == 4 && this.status == 200) {
 				// 列表
 				if (this.responseURL.indexOf('adrive/v3/file/list') > -1) {
-					let {items, next_marker} = JSON.parse(this.response);
+					let { items, next_marker } = JSON.parse(this.response);
 					nextMarker = next_marker;
 					token =
 						(this._header_ && (this._header_.Authorization || this._header_.authorization)) ||
@@ -411,7 +366,7 @@ XMLHttpRequest.prototype.open = function () {
 				// 搜索结果
 				if (this.responseURL.indexOf('adrive/v3/file/search') > -1) {
 					obj = {};
-					let {items, next_marker} = JSON.parse(this.response);
+					let { items, next_marker } = JSON.parse(this.response);
 					nextMarker = next_marker;
 					token =
 						(this._header_ && (this._header_.Authorization || this._header_.authorization)) ||
@@ -427,9 +382,9 @@ XMLHttpRequest.prototype.open = function () {
 				}
 				// 文件夹
 				if (this.responseURL.indexOf('adrive/v1/file/get_path') > -1) {
-					let {items} = JSON.parse(this.response);
+					let { items } = JSON.parse(this.response);
 					if (items.length) {
-						let {parent_file_id, name} = items[0];
+						let { parent_file_id, name } = items[0];
 						if (parent_file_id !== 'root') {
 							parentFileName = name;
 							prefix.value = name;
@@ -513,10 +468,11 @@ async function rename(body) {
 		return Promise.resolve(false);
 	}
 }
+
 </script>
 
-<style scoped>
 
+<style scoped>
 /* Element Plus dialog 样式覆盖 */
 :deep(.el-overlay) {
 	position: fixed;
