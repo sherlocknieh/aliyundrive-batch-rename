@@ -293,12 +293,46 @@ function handleFilter(val) {
 	data.sortList = data.sortList.sort(compareEpisodes);
 }
 
-function handleBatchBtnClick() {
+async function handleBatchBtnClick() {
 	if (nextMarker) {
-		ElMessage.warning(`当前目录还有未加载完的文件，请滚动页面加载`);
-	} else {
-		handleFilter(needFilter.value);
-		dialogVisible1.value = true;
+		ElMessage.info(`正在加载所有文件...`);
+		await autoScrollToLoadAll();
+	}
+	handleFilter(needFilter.value);
+	dialogVisible1.value = true;
+}
+
+async function autoScrollToLoadAll() {
+	// 等待DOM更新
+	await new Promise(resolve => setTimeout(resolve, 100));
+
+	const wait = (ms = 400) => new Promise(resolve => setTimeout(resolve, ms));
+	const fireScroll = el => {
+		el.dispatchEvent(new Event('scroll', { bubbles: true }));
+		el.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 120 }));
+	};
+	const getScroller = () => {
+		// 阿里云盘列表真实滚动容器（参考 test.html）
+		return (
+			document.querySelector('.scroller---esn7') ||
+			document.querySelector('[class*="scroller---"]') ||
+			document.querySelector('.node-list-table-view--rX4DA .tbody--Na444 [style*="overflow: auto"]') ||
+			document.scrollingElement ||
+			document.documentElement
+		);
+	};
+
+	let guard = 0;
+	while (nextMarker && guard < 200) {
+		const scroller = getScroller();
+		if (scroller) {
+			scroller.scrollTop = scroller.scrollHeight;
+			fireScroll(scroller);
+		} else {
+			window.scrollTo(0, document.body.scrollHeight);
+		}
+		guard++;
+		await wait(500);
 	}
 }
 
