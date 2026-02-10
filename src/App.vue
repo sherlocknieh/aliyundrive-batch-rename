@@ -5,9 +5,10 @@
 		<el-dialog v-model="dialogVisible1" width="80%" destroy-on-close>
 			<!-- 文件列表 -->
 			<el-card shadow="never" class="rounded-2xl border border-slate-200/70 bg-white/80 backdrop-blur">
+				<!-- 列表头部 -->
 				<template #header>
 					<div class="flex items-center justify-between text-sm font-semibold text-slate-800">
-						<span>选择</span>
+						<span>拖动调整排序</span>
 						<div class="flex items-center">
 							<span class="mr-2.5 text-slate-500">过滤非视频文件</span>
 							<el-switch v-model="needFilter" @change="handleFilter">
@@ -15,13 +16,14 @@
 						</div>
 					</div>
 				</template>
-				<div
-					class="flex gap-4 leading-9.75 p-0 box-border h-130 w-full overflow-y-auto tw-scroll rounded-xl border border-slate-200/60 bg-slate-50/70">
+				<!-- 列表内容 -->
+				<div id="selectList" class="flex gap-4 leading-9.75 p-0 box-border max-h-[60vh] w-full overflow-y-auto tw-scroll rounded-xl border border-slate-200/60 bg-slate-50/70">
+					<!-- 左边索引 -->
 					<div class="flex flex-col text-right py-2.5 pl-2 border-r border-slate-200/70 pr-4 bg-white/50">
 						<span v-for="(_, index) in data.sortList" :key="index"
-							class="w-10 h-9.75 leading-9.75 flex items-center justify-end text-xs font-medium text-slate-500 border-b border-transparent">{{
-								index + 1 }}</span>
+							class="w-10 h-9.75 leading-9.75 flex items-center justify-end text-xs font-medium text-slate-500 border-b border-transparent">{{ index + 1 }}</span>
 					</div>
+					<!-- 可拖拽列表 -->
 					<div class="flex-1 pl-1">
 						<draggable v-model="data.sortList" :item-key="'file_id'" :animation="0"
 							class="min-h-5 w-full py-2.5 pr-2" ghostClass="tw-ghost" group="description" tag="ul"
@@ -120,9 +122,8 @@
 				</el-tabs>
 				<!-- 结果预览 -->
 				<el-card header="预览" shadow="never"
-					class="rounded-2xl border border-slate-200/70 bg-white/80 backdrop-blur flex-1 min-h-0">
-					<div
-						class="flex gap-4 leading-9.75 p-0 box-border h-full w-full overflow-y-auto tw-scroll rounded-xl border border-slate-200/60 bg-slate-50/70">
+					class="preview-card rounded-2xl border border-slate-200/70 bg-white/80 backdrop-blur flex-1 min-h-0">
+					<div id="previewList" class="flex flex-1 min-h-0 gap-4 leading-9.75 p-0 box-border w-full overflow-y-auto tw-scroll rounded-xl border border-slate-200/60 bg-slate-50/70">
 						<!-- 索引 -->
 						<div class="flex flex-col text-right py-2.5 pl-2 border-r border-slate-200/70 pr-4 bg-white/50">
 							<span v-for="(_, index) in data.sortList" :key="index"
@@ -130,7 +131,7 @@
 								{{ index + 1 }}
 							</span>
 						</div>
-
+						<!-- 预览列表 -->
 						<div class="flex-1 pl-1">
 							<ul class="min-h-5 w-full py-2.5 pr-2">
 								<li class="m-0 box-border relative tracking-[1px] whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-between text-sm select-none rounded-lg px-3 h-9.75 hover:bg-white/80"
@@ -161,7 +162,7 @@
 
 		<!-- 启动按钮 -->
 		<el-button @click="handleBatchBtnClick"
-			class="fixed z-1000 bottom-30 right-8 rounded-full px-8 h-10 text-white bg-linear-to-r from-[#637dff] to-[#6c5cff] transition-all duration-300 ease-out hover:-translate-y-0.5  active:translate-y-0 active:shadow-[0_8px_20px_rgba(99,125,255,0.35)]" type="primary">
+			class="fixed z-1000 bottom-30 right-12 rounded-full! border-0! px-8 h-10 text-white  bg-linear-to-r from-[#637dff] to-[#637dff] transition-all duration-300 ease-out active:translate-y-0 active:shadow-[0_8px_20px_rgba(99,125,255,0.35)]" type="primary">
 			批量重命名
 		</el-button>
 	</div>
@@ -294,9 +295,18 @@ function handleFilter(val) {
 }
 
 async function handleBatchBtnClick() {
+	let loadingMessage;
 	if (nextMarker) {
-		ElMessage.info(`正在加载所有文件...`);
-		await autoScrollToLoadAll();
+		loadingMessage = ElMessage({
+			message: `正在加载所有文件`,
+			type: 'info',
+			duration: 0
+		});
+		try {
+			await autoScrollToLoadAll();
+		} finally {
+			loadingMessage.close();
+		}
 	}
 	handleFilter(needFilter.value);
 	dialogVisible1.value = true;
@@ -312,14 +322,22 @@ async function autoScrollToLoadAll() {
 		el.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 120 }));
 	};
 	const getScroller = () => {
-		// 阿里云盘列表真实滚动容器（参考 test.html）
-		return (
-			document.querySelector('.scroller---esn7') ||
-			document.querySelector('[class*="scroller---"]') ||
-			document.querySelector('.node-list-table-view--rX4DA .tbody--Na444 [style*="overflow: auto"]') ||
-			document.scrollingElement ||
-			document.documentElement
-		);
+		// 阿里云盘自带列表滚动容器（支持列表+网格两种布局）
+		const selectors = [
+			'.scroller---esn7',
+			'[class*="scroller---"]',
+			'.node-list-table-view--rX4DA .tbody--Na444 [style*="overflow: auto"]',
+			'.grid-scroll--O0kCz',
+			'.node-list-grid-view--RRe27 .grid-scroll--O0kCz',
+			'.node-list-grid-view--RRe27 .grid--QtRCl [style*="overflow: auto"]'
+		];
+		for (const selector of selectors) {
+			const scroller = document.querySelector(selector);
+			if (scroller) {
+				return scroller;
+			}
+		}
+		return document.scrollingElement || document.documentElement;
 	};
 
 	let guard = 0;
@@ -537,5 +555,30 @@ async function rename(body) {
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
+}
+
+:deep(.preview-card .el-card__body) {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.tw-scroll {
+	scrollbar-gutter: stable;
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e1 transparent;
+}
+
+.tw-scroll::-webkit-scrollbar {
+	width: 8px;
+}
+
+.tw-scroll::-webkit-scrollbar-thumb {
+	background-color: #cbd5e1;
+	border-radius: 999px;
+}
+
+.tw-scroll::-webkit-scrollbar-track {
+	background: transparent;
 }
 </style>
